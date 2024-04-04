@@ -6,5 +6,6 @@ __pycache__
 *.sqlite3-journal
 .git
 .idea
+.ipynb_checkpoints
 test.py
 tester.ipynb
