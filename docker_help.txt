@@ -1,0 +1,21 @@
+docker pull ubuntu:latest                                   # скачать образ
+docker run debian echo "Hello world"                        # запуск контейнера от образа debian + выполнение команды
+docker run --name mredis -d redis                           # запуск контейнера от образа redis указав имя mredis, -d в фоновом режиме
+docker run -it debian /bin/bash                             # запуск контейнера от образа debian в интерактивоной среде + bash
+docker run -h CONTAINER -it /bin/bash                       # CONTAINER - имя контейнера
+docker run --rm -it --link mredis:redis redis /bin/bash     # запуск контейнера от образа redis и связать (сеть) с контейнером mredis:redis 
+docker run -v /data test/ubuntu                             # запуск контейнера от образа test/ubuntu и общим c хост машиной каталогом /data
+docker run -d -p 8000:8000 nginx                            # запуск контейнера c с перенаправлением 8000 порта хоста на 8000 контейнера
+docker run -d -p 5000:5000 -v "$(pwd)"/app:/app newapp      # Аргумент -v "$(pwd)"/app:/app позволяет смонтировать подкаталог app из текущего 
+                                                              рабочего каталога хоста на каталог /app внутри контейнера. Старое содержимое 
+                                                              каталога /app контейнера заменяется новым, при этом сохраняется возможность 
+                                                              записи в этот каталог.
+
+docker diff CONTAINER                                       # список файлов измененных в работающем контейнере CONTAINER
+docker port  CONTAINER                                      # порт назначенный Docker
+docker rm CONTAINER                                         # удаление контейнера CONTAINER
+
+docker build -t name_image:tag_image .                      # содание образа, выполнить команду в каталоге с подготовленным Dockerfile
+                                                              точка указывает текущий каталог
+
+
