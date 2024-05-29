@@ -9,4 +9,6 @@ __pycache__
 .idea
 .ipynb_checkpoints
 test.py
+tester.py
+test.ipynb
 tester.ipynb
