@@ -153,6 +153,29 @@ docker run -d -p 5000:5000 -v "$(pwd)"/app:/app newapp      # Аргумент -
 
 
 
+6)  
+    0. Создаем приложение, например на Flask.
+
+    1. В каталоге приложения создать Dockerfile, например:
+        
+                FROM python:3.11
+
+                RUN pip install flask
+                WORKDIR /app
+                COPY app /app
+                USER user
+
+                CMD ["python", "identidock.py"]
+
+    2. Создать образ
+
+            cd app
+            docker build -t app .
+
+    3. Запуск контейнера
+
+            docker run -d -p 5000:5000 app
+
 
 
 
