@@ -1,0 +1,151 @@
+1. Python
+-------------------------------
+sudo apt get install python3, python3-virtualenv, python3-dev, gcc,
+					pkg-config, default-libmysqlclient-dev, build-essential
+
+
+2. workdir
+--------------------------------
+cd /var
+sudo mkdir www
+sudo chmod 777 -R www/
+
+
+3. virtual environment
+---------------------------------
+cd www
+virtualenv -p python3 venv_aisk/
+sudo chmod 777 -R /var/www/venv_aisk
+sudo chown -R $user:$user /var/www/venv_aisk
+source venv_aisk/bin/activate
+
+
+4. Mysql
+----------------------------------
+sudo apt install mariadb-server mariadb-client
+sudo mysql_secure_installation
+sudo systemctl status mariadb
+
+- создание БД и пользователя под проект
+mysql -u root -p
+| при ошибке "ERROR 1698 (28000): Access denied for user 'root'@'localhost'"
+| mysql -u root -p
+| USE mysql;
+| ALTER USER 'root'@'localhost' IDENTIFIED VIA mysql_native_password;
+| SET PASSWORD FOR 'root'@'localhost' = PASSWORD('new_password');
+| FLUSH PRIVILEGES;
+| exit;
+
+create database aisk_db character set utf8 collate utf8_unicode_ci;
+create user 'user_aisk'@'%' identified by 'Wtynhnhfyc22';
+grant all privileges on aisk_db.* to 'user_aisk'@'%';
+flush privileges;
+exit;
+
+- для доступа из-вне
+| /etc/mysql/mysqld.cnf
+| bind-address 0.0.0.0
+
+sudo systemctl start mariadb
+sudo systemctl enable mariadb
+
+
+5. Django
+---------------------------------
+pip install Django==5.1.2, mysqlclient
+
+git clone http://192.168.10.207/maksim/ais.git aisk
+- редактирование settings.py
+|DATABASES = {
+|    'default': {
+|        'ENGINE': 'django.db.backends.mysql',
+|        'NAME': 'aisk_db',
+|        'USER': 'user_aisk',
+|        'PASSWORD': 'Wtynhnhfyc22',
+|        'HOST': '127.0.0.1',
+|        'PORT': '3306',
+|    }
+|}
+
+- при ошибке 403
+| CSRF_TRUSTED_ORIGINS = ['http://*', 'https://*']
+
+
+- static files
+| STATIC_ROOT = '/var/www/proj/static/'
+| STATIC_URL = '/static/'
+
+python manage.py collectstatic
+
+
+pip install <all requirements!>
+
+python manage.py makemigrations <app_name>   app_name !
+python manage.py migrate
+python manage.py createsuperuser
+
+
+6. Gunicorn
+(WSGI (Web Server Gateway Interface) — стандарт взаимодействия между Python-программой, выполняющейся на стороне сервера, и самим веб-сервером, например Nginx.
+WSGI-сервер Gunicorn, предоставит интерфейс, обеспечивающий преобразование клиентских запросов по протоколу HTTP в вызовы Python, исполняемые приложением)
+---------------------------------
+pip install gunicorn
+
+touch /var/www/proj_folder/gunicorn.conf.py
+bind = '192.168.10.17:8001'
+workers = 4
+timeout = 7200
+
+sudo systemctl start (stop, restart) gunicorn
+
+
+7. Supervisor
+-----------------------------------
+sudo apt install supervisor
+
+sudo touch /etc/supervisor/conf.d/proj.conf
+| [program:aisk]
+| command = /var/www/venv_aisk/bin/gunicorn --config='/var/www/aisk/gunicorn.conf.py' --pythonpath '/var/www/venv_aisk/' --env DJANGO_SETTINGS_MODULE=ais.settings ais.wsgi
+| directory = /var/www/aisk/
+| user = nobody
+| autostart = true
+| autorestart = true
+| redirect_stderr = true
+
+sudo systemctl start supervisor
+sudo systemctl enable supervisor
+
+sudo supervisorctl status
+sudo supervisorctl reread
+sudo supervisorctl update
+sudo supervisorctl restart proj
+
+sudo service supervisor restart
+
+
+8. Nginx
+-----------------------------------------
+sudo apt install nginx
+
+sudo touch /etc/nginx/sites-available/proj
+
+| server {
+|     listen 9001;
+|     server_name 192.168.10.17 aisk;
+|     access_log /var/log/nginx/aisk.log;
+| 
+|     location /static/ {
+|         root /var/www/aisk/;
+|         expires 3d;
+|     }
+| 
+|     location / {
+|         proxy_pass http://192.168.10.17:8001;
+|         proxy_set_header Host $server_name;
+|         proxy_set_header X-Real-IP $remote_addr;
+|         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+|     }
+| }
+
+sudo ln -s /etc/nginx/sites-available/proj /etc/nginx/sites-enabled/
+sudo service nginx restart (reload)
