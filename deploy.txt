@@ -80,7 +80,7 @@ python manage.py collectstatic
 
 pip install <all requirements!>
 
-python manage.py makemigrations <app_name>   app_name !
+python manage.py makemigrations <app_name>   # app_name !
 python manage.py migrate
 python manage.py createsuperuser
 
