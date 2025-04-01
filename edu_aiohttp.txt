@@ -1,0 +1,92 @@
+---------------------------------------------------------------------------------------------------
+1. Простое веб-приложение:
+
+from aiohttp import web
+from aiohttp.web_request import Request
+from aiohttp.web_response import Response
+
+routes = web.RouteTableDef()
+
+
+@routes.get('/test')
+async def test(request):
+    result = {'id': 1}
+    return web.json_response(result)
+
+
+app = web.Application()
+app.add_routes(routes)
+web.run_app(app, port=9001)
+---------------------------------------------------------------------------------------------------
+
+---------------------------------------------------------------------------------------------------
+2. Веб-приложение с многими конкурентными подключениями. Создается не одно подключение, а пул.
+from aiohttp import web
+from aiohttp.web_request import Request
+from aiohttp.web_response import Response
+import asyncpg
+
+
+routes = web.RouteTableDef()
+
+# создание пула подключений
+async def create_db_pool(app):
+    pool = await asyncpg.create_pool(host='192.168.10.98', port=5432, user='postgres', password='1',
+                                     database='TTPSBO', min_size=6, max_size=6)
+    app['pool'] = pool
+
+# удаление пула подключений
+async def destroy_db_pool(app):
+    pool = app['pool']
+    await pool.close()
+
+
+# GET метод
+@routes.get('/test')
+async def test(request):
+    connection_pool = request.app['pool']
+    query = '''
+        select * ...
+    '''
+    results = await connection_pool.fetch(query)
+    dict_results = [dict(result) for result in results]
+    return web.json_response(dict_results)
+
+
+# POST метод
+@routes.post('/newtest')
+async def newtest(request):
+    if not request.can_read_body:
+        raise web.HTTPBadRequest()
+
+    # тело запроса
+    body = await request.json()
+
+    connection_pool = request.app['pool']
+
+    query = ''' INSERT ... '''
+
+    await connection_pool.execute(query)
+
+    return web.Response(status=201)
+
+
+
+app = web.Application()
+# обработчик сигналов при старте приложения
+app.on_startup.append(create_db_pool) 
+# обработчик сигналов при выходе из приложения
+app.on_cleanup.append(destroy_db_pool)
+app.add_routes(routes)
+web.run_app(app, port=9001)
+---------------------------------------------------------------------------------------------------
+
+---------------------------------------------------------------------------------------------------
+3. Маршрут с параметром
+
+@routes.get('/test/{id}')
+async def test_id(request):
+    _id = int(request.match_info['id'])
+    result = {'id': _id}
+    return web.json_response(result)
+---------------------------------------------------------------------------------------------------
