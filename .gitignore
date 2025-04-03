@@ -11,4 +11,3 @@ __pycache__
 .ipynb_checkpoints
 test*.*
 *.exe
-/bots/infos.txt
