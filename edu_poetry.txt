@@ -1,0 +1,46 @@
+1. установка (powershell)
+(Invoke-WebRequest -Uri https://install.python-poetry.org -UseBasicParsing).Content | py -
+
+добавить в переменные среды
+[Environment]::SetEnvironmentVariable("Path", [Environment]::GetEnvironmentVariable("Path", "User") + ";C:\Users\Maksim\AppData\Roaming\Python\Scripts", "User")
+
+
+
+2. обновление
+poetry self update
+
+
+
+3. новый проект poetry
+poetry new <project_name/folder>
+
+
+
+4. установка в уже созданный проект
+poetry init
+
+
+
+5. установить зависимости проекта
+poetry install
+
+Poetry считывает данные из pyproject.toml, строит дерево зависимостей проекта,
+разрешая проблемы с версиями зависимостей, и устанавливает все пакеты. 
+Однако, если в проекте уже есть файл poetry.lock, то будут использоваться точные версии из этого файла.
+
+дополнительные параметры:
+--remove-untracked: удалит старые пакеты, которые больше не используются в проекте
+--no-dev: dev пакеты не будут устанавливаться
+
+
+
+6. обновить версии зависимостей (тем самым обновив файл poetry.lock) 
+poetry update
+
+обновить выборочные пакеты
+poetry update pack1 pack2
+
+дополнительные параметры:
+--no-dev : игнорирует обновление dev пакетов
+--lock : не устанавливает и не обновляет пакеты, а только обновляет файл poetry.lock
+
