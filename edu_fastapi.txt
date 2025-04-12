@@ -1,0 +1,83 @@
+1.
+
+from fastapi import FastAPI
+
+app = FastAPI()
+
+@app.get('/hi')
+def hi():
+    return 'Success!'
+
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run('main:app', reload=True)
+
+--------------------------------------------------------------------
+2. Параметр в url
+
+@app.get('/hi/{name}')
+def hi(name):
+    return f'Hello, {name} !'
+
+--------------------------------------------------------------------
+3. Параметры запроса — это строки name=value после символа ? в URL-адресе,
+разделенные символами &.
+пр. 127.0.0.1:8000/hi?name=Maks&fam=D
+
+from fastapi import FastAPI, Request
+@app.get('/hi')
+def hi(request: Request):
+    return request.query_params
+
+---------------------------------------------------------------------
+4. Получение значений из тела запроса + post method
+
+from typing import Any, Dict
+@app.post('/hi')
+def hip(datas=Dict[Any, Any]):
+    return datas
+
+---------------------------------------------------------------------
+5. Получение заголовков
+
+@app.post('/headers')
+def hip(request: Request):
+    return request.headers
+
+----------------------------------------------------------------------
+6. Установка заголовка
+
+from fastapi import FastAPI, Response
+@app.post('/hish')
+def hish(response: Response):
+    response.headers['Client-Name'] = 'User'
+    return 'Done'
+
+----------------------------------------------------------------------
+7. Типы ответов
+from fastapi.responses import
+JSONResponse,
+HTMLResponse,
+PlainTextResponse,
+RedirectResponse,
+FileResponse,
+StreamingResponse
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
