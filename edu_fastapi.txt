@@ -65,6 +65,74 @@ FileResponse,
 StreamingResponse
 
 
+----------------------------------------------------------------------
+8. Определение модели Pydantic
+
+models.py
+...
+from pydantic import BaseModel
+...
+class Human(BaseModel):
+    name: str
+    age: float
+    profession: str
+...
+
+
+----------------------------------------------------------------------
+9. Формирование источника данных (единичную запись и список записей)
+
+datas.py
+...
+from models import Human
+
+
+
+super_human = Human(
+    name='God',
+    age=float('inf'),
+    profession='god'
+)
+
+
+
+_humans: list[Human] = [
+    Human(
+        name='First',
+        age=30.0,
+        profession='coder'
+    ),
+    Human(
+        name='Second',
+        age=35.0,
+        profession='developer'
+    )
+]
+...
+
+
+----------------------------------------------------------------------
+10. Возврат json веб клиенту
+
+...
+@app.get('/humans')
+async def get_humans() -> list[Human]:
+    return _humans
+...
+
+
+----------------------------------------------------------------------
+11. Проверка (validation) полей записи
+
+models.py
+...
+from pydantic import BaseModel, Field
+...
+class HumanAlt(BaseModel):
+    name: str | None = Field(default=None, max_length=3)
+    age: float
+    profession: str
+
 
 
 
