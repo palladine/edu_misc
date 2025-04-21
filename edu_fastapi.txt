@@ -1,58 +1,58 @@
 1.
 
-from fastapi import FastAPI
+    from fastapi import FastAPI
 
-app = FastAPI()
+    app = FastAPI()
 
-@app.get('/hi')
-def hi():
-    return 'Success!'
+    @app.get('/hi')
+    def hi():
+        return 'Success!'
 
 
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run('main:app', reload=True)
+    if __name__ == "__main__":
+        import uvicorn
+        uvicorn.run('main:app', reload=True)
 
 --------------------------------------------------------------------
 2. Параметр в url
 
-@app.get('/hi/{name}')
-def hi(name):
-    return f'Hello, {name} !'
+    @app.get('/hi/{name}')
+    def hi(name):
+        return f'Hello, {name} !'
 
 --------------------------------------------------------------------
 3. Параметры запроса — это строки name=value после символа ? в URL-адресе,
 разделенные символами &.
 пр. 127.0.0.1:8000/hi?name=Maks&fam=D
 
-from fastapi import FastAPI, Request
-@app.get('/hi')
-def hi(request: Request):
-    return request.query_params
+    from fastapi import FastAPI, Request
+    @app.get('/hi')
+    def hi(request: Request):
+        return request.query_params
 
 ---------------------------------------------------------------------
 4. Получение значений из тела запроса + post method
 
-from typing import Any, Dict
-@app.post('/hi')
-def hip(datas=Dict[Any, Any]):
-    return datas
+    from typing import Any, Dict
+    @app.post('/hi')
+    def hip(datas=Dict[Any, Any]):
+        return datas
 
 ---------------------------------------------------------------------
 5. Получение заголовков
 
-@app.post('/headers')
-def hip(request: Request):
-    return request.headers
+    @app.post('/headers')
+    def hip(request: Request):
+        return request.headers
 
 ----------------------------------------------------------------------
 6. Установка заголовка
 
-from fastapi import FastAPI, Response
-@app.post('/hish')
-def hish(response: Response):
-    response.headers['Client-Name'] = 'User'
-    return 'Done'
+    from fastapi import FastAPI, Response
+    @app.post('/hish')
+    def hish(response: Response):
+        response.headers['Client-Name'] = 'User'
+        return 'Done'
 
 ----------------------------------------------------------------------
 7. Типы ответов
@@ -68,74 +68,137 @@ StreamingResponse
 ----------------------------------------------------------------------
 8. Определение модели Pydantic
 
-models.py
-...
-from pydantic import BaseModel
-...
-class Human(BaseModel):
-    name: str
-    age: float
-    profession: str
-...
+    models.py
+    ...
+    from pydantic import BaseModel
+    ...
+    class Human(BaseModel):
+        name: str
+        age: float
+        profession: str
+    ...
 
 
 ----------------------------------------------------------------------
 9. Формирование источника данных (единичную запись и список записей)
+   ! Это фиктивные данные !
 
-datas.py
-...
-from models import Human
-
-
-
-super_human = Human(
-    name='God',
-    age=float('inf'),
-    profession='god'
-)
+    datas.py
+    ...
+    from models import Human
 
 
 
-_humans: list[Human] = [
-    Human(
-        name='First',
-        age=30.0,
-        profession='coder'
-    ),
-    Human(
-        name='Second',
-        age=35.0,
-        profession='developer'
+    super_human = Human(
+        name='God',
+        age=float('inf'),
+        profession='god'
     )
-]
-...
+
+
+
+    _humans: list[Human] = [
+        Human(
+            name='First',
+            age=30.0,
+            profession='coder'
+        ),
+        Human(
+            name='Second',
+            age=35.0,
+            profession='developer'
+        )
+    ]
+    ...
 
 
 ----------------------------------------------------------------------
 10. Возврат json веб клиенту
 
-...
-@app.get('/humans')
-async def get_humans() -> list[Human]:
-    return _humans
-...
+    ...
+    @app.get('/humans')
+    async def get_humans() -> list[Human]:
+        return _humans
+    ...
 
 
 ----------------------------------------------------------------------
 11. Проверка (validation) полей записи
 
-models.py
-...
-from pydantic import BaseModel, Field
-...
-class HumanAlt(BaseModel):
-    name: str | None = Field(default=None, max_length=3)
-    age: float
-    profession: str
+    models.py
+    ...
+    from pydantic import BaseModel, Field
+    ...
+    class HumanAlt(BaseModel):
+        name: str | None = Field(default=None, max_length=3)
+        age: float
+        profession: str
 
 
+----------------------------------------------------------------------
+12. Зависимости
+
+    from fastapi import Depends, Params
+
+    # функция зависимости
+    def user_dep(name: str=Params):
+        return {'name': name}
+
+    @app.get('/user')
+    def get_user(user: dict=Depends(user_dep)) -> dict:
+        return user
 
 
+a)  Если функция зависимости просто проверяет что-то и не возвращает никаких 
+значений, то можно определить зависимость в декораторе пути:
+
+    @app.method(url, dependencies=[Depends(depfunc)])
+
+b) для всех функций пути объекта router:
+
+    from fastapi import APIRouter
+    router = APIRouter(..., dependencies=[Depends(depfunc)])
+
+c) для всего приложения
+
+    app = FastAPI(dependencies=[Depends(depfunc1), Depends(depfunc2)])
+
+
+----------------------------------------------------------------------
+13. Данные могут поступать из разных частей HTTP-сообщения. Можно указать
+зависимости для сбора данных из разных частей:
+    Header — в HTTP-заголовке;
+    Path — в пути URL;
+    Query — после символа ? в URL;
+    Body — в теле HTTP-сообщения.
+
+    # получение заголовков и тело запроса
+    @app.post('/start')
+    async def start(content_type: str|None = Header(default=None),
+                some_header: str|None = Header(default=None),
+                body : dict|None = Body()):
+        return content_type, some_header, body
+
+
+----------------------------------------------------------------------
+14. Подмаршруты
+
+    api.py
+    from fastapi import APIRouter
+
+    router = APIRouter(prefix = "/api")
+
+    @router.get('/')
+    def api_start():
+        return 'api main'
+
+
+    main.py
+    import api
+
+    app = FastAPI()
+
+    app.include_router(api.router)
 
 
 
