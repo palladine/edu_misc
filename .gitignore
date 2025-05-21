@@ -9,5 +9,6 @@ __pycache__
 .git
 .idea
 .ipynb_checkpoints
+.pytest_cache
 test*.*
 *.exe
