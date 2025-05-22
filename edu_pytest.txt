@@ -65,53 +65,8 @@ pytest -p mypluginmodule        # подключение плагина
             f()
 
 
-
--------------------------------------------------------------------------------------------
-3.
-Фикстуры — это функции, которые создают окружение вокруг тестов. 
-Они удобны, когда нужно передать одни и те же входные данные нескольким тестам.
-
-        @pytest.fixture()
-        def get_prime_nums():
-            prime_nums = []
-            for num in range(1, 50):
-                for div in range(2, num):
-                    if num % div == 0:
-                        break
-                else:
-                    prime_nums.append(num)
-            return prime_nums
-
-        # тест
-        def test_multiply2(get_prime_nums):
-            prime_nums = get_prime_nums
-            assert multiply2(prime_nums) == [2, 4, 6, 10, 14, 22, 26, 34, 38, 46, 58, 62, 74, 82, 86, 94]
-
-
-Область действия фикстуры указывается в её декораторе аргументом scope='область действия'. 
-Всего есть пять уровней:
-        'function' — для функции;
-        'class' — для класса;
-        'module' — для модуля (то есть py-файла);
-        'package' — для пакета;
-        'session' — для всей сессии тестирования.
-
-        @pytest.fixture(scope='module')
-        def get_prime_nums():
-            print('\nРабота фикстуры')
-            prime_nums = []
-            for num in range(1, 50):
-                for div in range(2, num):
-                    if num % div == 0:
-                        break
-                else:
-                    prime_nums.append(num)
-            yield prime_nums
-            print('\nРабота финализатора')
-
-
-4.
-Параметризация
+-----------------------------------------------------------------------------
+6. Параметризация
 
     # main.py
     def positive_or_negative(x):
@@ -136,6 +91,75 @@ pytest -p mypluginmodule        # подключение плагина
                             (0, 'zero')])
     def test_positive_or_negative(x, expected_result):
         assert positive_or_negative(x) == expected_result
+
+
+-------------------------------------------------------------------------------------------
+7.
+Фикстуры — это функции, которые создают окружение вокруг тестов. 
+Они удобны, когда нужно передать одни и те же входные данные нескольким тестам.
+
+        @pytest.fixture
+        def get_prime_nums():
+            prime_nums = []
+            for num in range(1, 50):
+                for div in range(2, num):
+                    if num % div == 0:
+                        break
+                else:
+                    prime_nums.append(num)
+            return prime_nums
+
+        # тест
+        def test_multiply2(get_prime_nums):
+            prime_nums = get_prime_nums
+            assert multiply2(prime_nums) == [2, 4, 6, 10, 14, 22, 26, 34, 38, 46, 58, 62, 74, 82, 86, 94]
+
+
+Область действия фикстуры указывается в её декораторе аргументом scope='область действия'. 
+Всего есть пять уровней (один вызов фикстуры! для ...):
+        'function' — для функции;
+        'class' — для класса;
+        'module' — для модуля (то есть py-файла) (т.е. каждая функция модуля-файла получит фикстуру);
+        'package' — для пакета;
+        'session' — для всей сессии тестирования.
+
+        @pytest.fixture(scope='module')
+        def get_prime_nums():
+            prime_nums = []
+            for num in range(1, 50):
+                for div in range(2, num):
+                    if num % div == 0:
+                        break
+                else:
+                    prime_nums.append(num)
+            return prime_nums
+
+
+При запросе фикстуры функцией! сначала инициализируются фикстуры с самой широкой областью действия
+- session и module, а затем - фикстуры более низкого уровня с областями class или function. 
+В рамках одной тестовой функции порядок создания фикстур с одинаковой областью действия зависит 
+от очередности вызова этих фикстур и установленных между ними зависимостей. При этом фикстуры с 
+параметром autouse = True инициализируются прежде явно объявленных фикстур того же уровня.
+
+
+Финализаторы фикстур. pytest поддерживает выполнение фикстурами специфического завершающего кода 
+при выходе из области действия. Если вы используете оператор yield вместо return, то весь код 
+после yield выполняет роль «уборщика».
+
+    @pytest.fixture(scope='module')
+        def get_prime_nums():
+            print('\nРабота фикстуры')
+            prime_nums = []
+            for num in range(1, 50):
+                for div in range(2, num):
+                    if num % div == 0:
+                        break
+                else:
+                    prime_nums.append(num)
+            yield prime_nums
+            print('\nРабота финализатора')   # будет выполнен после последнего теста модуля !
+
+
 
 
 
