@@ -164,7 +164,7 @@ pytest -p mypluginmodule        # подключение плагина
 
 Финализаторы фикстур. pytest поддерживает выполнение фикстурами специфического завершающего кода 
 при выходе из области действия. Если вы используете оператор yield вместо return, то весь код 
-после yield выполняет роль «уборщика».
+после yield выполняет роль «уборщика». yield передает управление pytest!
 
         @pytest.fixture(scope='module')
         def get_prime_nums():
@@ -243,7 +243,7 @@ pytest -p mypluginmodule        # подключение плагина
 
     # pytest.ini
     [pytest]
-    addopts = --strict-markers
+    addopts = --strict-markers   (проверяет на актуальные маркеры)
     markers =
         slow: mark test as slow (не будут выбраны при запуске с '-m "not slow"')
         critical_test: mark test as critical
