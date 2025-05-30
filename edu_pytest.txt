@@ -313,8 +313,15 @@ pip install pytest pytest-xdist pytest-django pytest-cov
 2)
 pytest.ini в корне проекта
 [pytest]
-DJANGO_SETTINGS_MODULE=aisvtk.settings
+DJANGO_SETTINGS_MODULE = aisvtk.settings
 python_files = tests.py test_*.py *_tests.py
+markers =
+    forms: Forms tests
+    models: Models tests
+    personal: Personal tests
+addopts = -q -rA --tb=no --strict-markers
+#--cov=base/ -s -rA --tb=no -v -n 4
+xfail_strict = true
 
 3) каталог tests в корне проекта
 
