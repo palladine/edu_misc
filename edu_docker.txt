@@ -24,6 +24,7 @@ Docker-compose — это утилита, позволяющая запуска�
 
     docker version              версия системы Docker
 
+    docker start                проверка использования ресурсов
 
 
 3)
@@ -50,6 +51,12 @@ Docker-compose — это утилита, позволяющая запуска�
 
     docker port  <container_name>                           порт назначенный Docker
 
+    docker run -m 512m --memory-swap 1g <container_name>    ограничивает доступную контейнеру память до 512 мегабайт
+                                                            общий лимит на RAM + swap = 1 гигабайт
+
+    docker run --cpus="1.5" <container_name>                контейнер может использовать до 1.5 CPU
+
+    docker run --pids-limit=100 <container_name>            контейнер не сможет создать более 100 процессов
 
 
 4) контейнер
@@ -247,7 +254,16 @@ Docker-compose — это утилита, позволяющая запуска�
                 default:    # external net
                 public:     # internal net
                     ipv4_address: 145.145.145.11
-
+                mem_limit: 128M
+                cpus: 0.50
+                # deploy:
+                #     resources:
+                #         limits:
+                #             cpus: 0.50
+                #             memory: 256M
+                #         reservations:
+                #             cpus: 0.25
+                #             memory: 128M
 
             sys2:
                 image: django_base:v1
@@ -275,3 +291,5 @@ Docker-compose — это утилита, позволяющая запуска�
         # external
         default:
             driver: bridge
+
+
