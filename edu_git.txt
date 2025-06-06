@@ -100,7 +100,10 @@
 
 8) История коммитов
 
-    HEAD - это символическое имя текущего выбранного коммита (коммит, над которым мы в данный момент работаем)
+    HEAD (*) - это символическое имя текущего выбранного коммита (ветки) (коммит, над которым мы в данный момент работаем)
+    Можно переключать ссылку от ветки, коммита или HEAD:
+    ^ или ~1       - на шаг назад (родитель)
+    ^^^ или ~3     - на три шага назад (прапрародитель)
 
     $ git log
     $ git log -1 HEAD             последний коммит
@@ -165,6 +168,7 @@
                                             эти файлы можно изменить, удалить или вернуть обратно в индекс
     $ git reset --hard <commit_hash>        проект откатывается к указанному коммиту и удаляет все последующие коммиты без возможности их восстановлени
 
+    $ git revert HEAD                       отмена в глобальном репозитории !
 
 
 10) Удаленные репозитории
@@ -250,24 +254,29 @@
     $ git branch                        список веток (* - текущая ветка) 
     $ git branch --merged               ветки, которые слиты с текущей
     
-    $ git branch <branch_name>          создание новой ветки (после будет указывать на текущий коммит!)
+    $ git branch <branch_name>          создание новой ветки на * указателе (после будет указывать на текущий коммит!)
                                         (текущая ветка отмечается меткой HEAD)
     
     $ git branch <branch_name> <start_point>    создание новой ветки от точки 
                                                 (пр. $ git branch devel_branch origin/master)
 
-    $ git checkout <branch_name>        переключение на ветку branch_name
+    $ git checkout <branch_name>/<commit>       переключение на ветку branch_name или коммит commit
+                                                (постановка HEAD на ветку или коммит)
+
+    $ git checkout <branch_name>^               переключиться на родителя ветки branch_name, т.е. перенести HEAD !
 
     $ git checkout -b <branch_name>     создание новой ветки и сразу переключение на нее
 
-    $ git merge <branch_name>           слияние с веткой (перейти на ту ветку, в которую необходимо внести 
-                                        изменения и выполнить команду)
+    $ git merge <branch_name>           слияние ветки branch_name с текущей веткой (у которой HEAD)
+                                        (перейти на ту ветку, в которую необходимо внести изменения и выполнить команду)
                                         (пр. $ git checkout master
                                              $ git merge testing )
 
-    $ git merge --abort                 отменить попытку слияния
+    $ git merge --abort                     отменить попытку слияния
 
-    $ git branch -d <branch_name>       удаление ветки branch_name
+    $ git branch -d <branch_name>           удаление ветки branch_name
+
+    $ git branch -f <branch_name> HEAD~3    переместить ветку branch_name на три родителя назад от HEAD
 
 
     $ git switch <branch_name>          переключиться на существующую ветку
@@ -293,7 +302,7 @@
     $ git push <сокращение> :<remote_branch_name>             удаление ветки на сервере
 
     $ git checkout <branch_name_source> 
-    $ git rebase <branch_name_destination>                  перемещение ветки <branch_name_source> в ветку <branch_name_destination>
+    $ git rebase <branch_name_destination>                  перемещение текущей ветки с HEAD <branch_name_source> в ветку <branch_name_destination>
     $ git checkout <branch_name_destination>
 
 
@@ -305,7 +314,7 @@
 
 
 
-    $ git cherry-pick <commit_hash1, commit_hash2, ...>     перемещение нужного (лучшего) коммита в актуальную ветку.
+    $ git cherry-pick <commit_hash1, commit_hash2, ...>     перемещение нужного (лучшего) коммита в актуальную ветку (к текущему HEAD).
                                                             Берётся патч, который был представлен в коммите, и делается попытка применить
                                                             его на ветке, на которой вы сейчас находитесь. Это удобно в том случае, если у вас в тематической
                                                             ветке находится несколько коммитов, а вы хотите включить в проект только один из них, или
