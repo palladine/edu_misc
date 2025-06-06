@@ -113,9 +113,9 @@ ORM
             model_config = ConfigDict(from_attributes=True)
 
 
-2) Для создания модели Pydantic из объекта ORM используется метод from_orm:
+2) Для создания модели Pydantic из объекта ORM используется метод model_validate():
 
-        user = User.from_orm(orm_instance)
+        user = User.model_validate(orm_instance)
 
 3) model_dump() — преобразуют модель в словарь Python:
 
