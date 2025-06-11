@@ -267,6 +267,18 @@ pytest -p mypluginmodule        # подключение плагина
     pytestmark = [pytest.mark.mark1, pytest.mark.mark2]
 
 
+# маркировка для всего каталога
+# в файле conftest.py каталога
+def pytest_collection_modifyitems(config, items):
+    mark = 'models'
+    cur_dir = os.path.dirname(__file__)
+
+    for item in items:
+        item_dir = item.fspath.dirname
+        if cur_dir == item_dir:
+            item.add_marker(mark)
+
+
 Простейший способ пропустить тестовую функцию - пометить ее декоратором skip, 
 которому может быть передана в качестве параметра reason причина пропуска.
 

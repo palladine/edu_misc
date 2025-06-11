@@ -117,6 +117,10 @@ ORM
 
         user = User.model_validate(orm_instance)
 
+        метод model_validate имеет несколько других атрибутов:
+            - strict=True (True-привенять строгую валидацию типов)
+            - context={'key': value} (передать дополнительный контекст валидаторам)
+
 3) model_dump() — преобразуют модель в словарь Python:
 
         data = user.model_dump()
