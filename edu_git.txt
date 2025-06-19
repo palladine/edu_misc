@@ -257,6 +257,8 @@
     
     $ git branch <branch_name>          создание новой ветки на * указателе (после будет указывать на текущий коммит!)
                                         (текущая ветка отмечается меткой HEAD)
+
+    $ git branch -m <old_branch_name> <new_branch_name>     переименование ветки old_branch_name в new_branch_name
     
     $ git branch <branch_name> <start_point>    создание новой ветки от точки 
                                                 (пр. $ git branch devel_branch origin/master)
@@ -322,7 +324,7 @@
                                                             если у вас только один коммит в тематической ветке, но вы предпочитаете выполнять отбор
                                                             лучшего вместо перемещения.
 
-    $ git rebase -i HEAD~3          
+    $ git rebase -i HEAD~3                                  вернуться к 3-му коммиту и изменить его
 
 
 13) Прятанье
