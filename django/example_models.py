@@ -5,12 +5,23 @@ from django.contrib.auth.models import PermissionsMixin
 from django.contrib.auth.hashers import make_password
 from .managers import UserManager
 from .crypto import encrypt, decrypt
-
+from django.core.exceptions import ValidationError
 
 
 
 
 # ---------------------------------------------  System's methods ------------------------------------------------------
+# method excludes fields from validation
+def exclude_fields(fields, exclude: set):
+    return [field for field in fields if field.name not in exclude]
+
+
+
+# Validators
+def validate_string(value):
+    if not value or not isinstance(value, str):
+        raise ValidationError(message=f'ValidationError')
+
 # ----------------------------------------------------------------------------------------------------------------------
 
 
@@ -24,7 +35,22 @@ class BaseModel(models.Model):
     class Meta:
         abstract = True
 
+    def clean(self):
+        for field in exclude_fields(self._meta.fields, {'id', 'pk'}):
+            validators = field.validators
+            if validators:
+                for validator in validators:
+                    try:
+                        value = getattr(self, field.name)
+                        validator(value)
+                    except:
+                        raise ValidationError(message='ValidationError')
+        super().clean()
 
+
+    def save(self, *args, **kwargs):
+        self.clean()
+        super(BaseModel, self).save(*args, **kwargs)
 
 
 
@@ -51,8 +77,6 @@ class HostConnect(BaseModel):
 
     def __str__(self):
         return "Хост [{}]".format(self.host)
-
-
 
 
 
@@ -100,16 +124,7 @@ class AppUser(AbstractBaseUser, PermissionsMixin):
 
 
 # ---------------------------------------------- App's methods ---------------------------------------------------------
-def get_doc_categories(literals: str):
-    query = Q()
-    for literal in literals:
-        query |= Q(categories__contains=literal)
-    return query
 
-
-def get_edu_inst_category(literal: str):
-    query = Q(category=literal)
-    return query
 # ----------------------------------------------------------------------------------------------------------------------
 
 
@@ -118,8 +133,10 @@ def get_edu_inst_category(literal: str):
 
 # ---------------------------------------------- App's models ----------------------------------------------------------
 class CardType(BaseModel):
-    name = models.CharField(blank=False, max_length=100, verbose_name="Тип транспортной карты")
-    slug = models.SlugField(blank=False, max_length=25, verbose_name="Метка")
+    name = models.CharField(blank=False, max_length=100, verbose_name="Тип транспортной карты",
+                            validators=[validate_string])
+    slug = models.SlugField(blank=False, max_length=25, verbose_name="Метка",
+                            validators=[validate_string])
 
     class Meta:
         verbose_name = "Тип транспортной карты"
@@ -133,16 +150,17 @@ class CardType(BaseModel):
             models.UniqueConstraint(fields=["slug"], name='%(class)s_slug')
         ]
 
-    # def __str__(self):
-    #     return f'{self._meta.verbose_name.title()} [{self.name}]'
+
     def __str__(self):
         return self.name
 
 
 
 class CardStatus(BaseModel):
-    name = models.CharField(blank=False, max_length=100, verbose_name="Статус транспортной карты")
-    slug = models.SlugField(blank=False, max_length=25, verbose_name="Метка")
+    name = models.CharField(blank=False, max_length=100, verbose_name="Статус транспортной карты",
+                            validators=[validate_string])
+    slug = models.SlugField(blank=False, max_length=25, verbose_name="Метка",
+                            validators=[validate_string])
 
     class Meta:
         verbose_name = "Статус транспортной карты"
@@ -170,9 +188,11 @@ class CardStatus(BaseModel):
 
 
 class Card(BaseModel):
-    number = models.CharField(blank=False, max_length=10, verbose_name="Номер транспортной карты")
+    number = models.CharField(blank=False, max_length=10, verbose_name="Номер транспортной карты",
+                              validators=[validate_string])
     card_type = models.ForeignKey('CardType', on_delete=models.PROTECT, verbose_name="Тип транспортной карты")
-    card_status = models.ForeignKey('CardStatus', on_delete=models.PROTECT, default=CardStatus.get_default_pk, verbose_name="Статус транспортной карты")
+    card_status = models.ForeignKey('CardStatus', on_delete=models.PROTECT, default=CardStatus.get_default_pk,
+                                    verbose_name="Статус транспортной карты")
     blocked = models.BooleanField(default=False, verbose_name="Статус блокировки")
 
     class Meta:
@@ -194,21 +214,43 @@ class Card(BaseModel):
 
 
 
+class DocumentCategory(BaseModel):
+    name = models.CharField(blank=False, max_length=100, verbose_name="Категория документа")
+    slug = models.SlugField(blank=False, max_length=3, verbose_name="Метка")
+
+    class Meta:
+        verbose_name = "Категория документа"
+        verbose_name_plural = "Категории документов"
+        ordering = ['pk']
+
+        db_table = 'document_category'
+
+        constraints = [
+            models.UniqueConstraint(fields=["name"], name='%(class)s_name'),
+            models.UniqueConstraint(fields=["slug"], name='%(class)s_slug')
+        ]
+
+    def __str__(self):
+        return self.name
+
+
+
 
 class DocumentType(BaseModel):
     '''
         'Categories' указывает к каким функциональным категориям относится вид документа.
-        Необходимо в "limit_choices_to" параметре в FK полях. 'Categories' состоит из набора латинских букв:
-        i - документ удостоверяющий личность,
-        p - школьная справка,
-        m - школьная справка о признании семьи малоимущей,
-        s - студенческий билет,
-        l - документ подтверждающий социальную льготу,
-        a - документ подтверждающий проживание.
+        Необходимо в "limit_choices_to" параметре в FK полях.
+            - документ удостоверяющий личность,
+            - школьная справка,
+            - справка о признании семьи малоимущей,
+            - студенческий билет,
+            - документ подтверждающий социальную льготу,
+            - документ подтверждающий проживание.
     '''
     name = models.CharField(blank=False, max_length=100, verbose_name="Вид документа")
     slug = models.SlugField(blank=False, max_length=25, verbose_name="Метка")
-    categories = models.CharField(blank=False, max_length=10, verbose_name="Функциональные категории документа")
+    categories = models.ManyToManyField('DocumentCategory',
+                                        verbose_name="Функциональные категории документа")
 
     class Meta:
         verbose_name = "Вид документа"
@@ -250,14 +292,15 @@ class JudicialBody(BaseModel):
 
 
 class Client(BaseModel):
-    last_name = models.CharField(blank=False, max_length=100, verbose_name="Фамилия")
-    first_name = models.CharField(blank=False, max_length=100, verbose_name="Имя")
-    middle_name = models.CharField(null=True, blank=True, max_length=100, verbose_name="Отчество")
+    last_name = models.CharField(blank=False, max_length=254, verbose_name="Фамилия")
+    first_name = models.CharField(blank=False, max_length=254, verbose_name="Имя")
+    middle_name = models.CharField(null=True, blank=True, max_length=254, verbose_name="Отчество")
 
-    doc_type = models.ForeignKey('DocumentType', on_delete=models.PROTECT, limit_choices_to=get_doc_categories('i'),
+    doc_type = models.ForeignKey('DocumentType', on_delete=models.PROTECT,
+                                 limit_choices_to=Q(categories_slug='i'),
                                  related_name='%(class)s_doc', verbose_name="Документ удостоверяющий личность")
-    doc_serie = models.CharField(blank=False, max_length=10, verbose_name="Серия документа")
-    doc_number = models.CharField(blank=False, max_length=20, verbose_name="Номер документа")
+    doc_serie = models.CharField(blank=False, max_length=254, verbose_name="Серия документа")
+    doc_number = models.CharField(blank=False, max_length=254, verbose_name="Номер документа")
     doc_date = models.DateField(blank=False, verbose_name="Дата выдачи документа")
     doc_issuedby = models.CharField(blank=False, max_length=254, verbose_name="Документ выдан")
 
@@ -290,8 +333,9 @@ class Pensioner(Client):
     sex = models.CharField(blank=False, max_length=4, verbose_name="Пол")
     address = models.CharField(blank=False, max_length=254, verbose_name="Адрес проживания")
     confirm_addr_doc_type = models.ForeignKey('DocumentType', on_delete=models.PROTECT, related_name='%(class)s_addr_doc',
-                                              limit_choices_to=get_doc_categories('a'), verbose_name="Вид документа подтверждающего проживание")
-    confirm_addr_doc_num = models.CharField(null=True, blank=True, max_length=20, verbose_name="Номер документа подтверждающего проживание")
+                                              limit_choices_to=Q(categories_slug='a'),
+                                              verbose_name="Вид документа подтверждающего проживание")
+    confirm_addr_doc_num = models.CharField(null=True, blank=True, max_length=254, verbose_name="Номер документа подтверждающего проживание")
     confirm_addr_doc_from = models.DateField(null=True, blank=True, verbose_name="Документ действует от")
     confirm_addr_doc_to = models.DateField(null=True, blank=True, verbose_name="Документ действует до")
     confirm_addr_doc_judicial_body = models.ForeignKey('JudicialBody', null=True, blank=True, on_delete=models.PROTECT,
@@ -318,9 +362,9 @@ class Pensioner(Client):
 
 class Beneficiary(Client):
     confirm_benefit_doc_type = models.ForeignKey('DocumentType', on_delete=models.PROTECT, related_name='%(class)s_benefit_doc',
-                                              limit_choices_to=get_doc_categories('l'),
+                                              limit_choices_to=Q(categories_slug='l'),
                                               verbose_name="Вид документа подтверждающего льготу")
-    confirm_benefit_doc_num = models.CharField(blank=False, max_length=20, verbose_name="Номер документа подтверждающего льготу")
+    confirm_benefit_doc_num = models.CharField(blank=False, max_length=254, verbose_name="Номер документа подтверждающего льготу")
     confirm_benefit_doc_date = models.DateField(blank=False, verbose_name="Дата выдачи документа")
     lic = models.CharField(blank=False, max_length=20, verbose_name="Лицевой счет")
     #  1 - льготник, 0 - сопровождающий
@@ -345,6 +389,27 @@ class Beneficiary(Client):
 
 
 
+class EducationalCategory(BaseModel):
+    name = models.CharField(blank=False, max_length=100, verbose_name="Категория образовательной организации")
+    slug = models.SlugField(blank=False, max_length=3, verbose_name="Метка")
+
+    class Meta:
+        verbose_name = "Категория образовательной организации"
+        verbose_name_plural = "Категории образовательных организаций"
+        ordering = ['pk']
+
+        db_table = 'educational_category'
+
+        constraints = [
+            models.UniqueConstraint(fields=["name"], name='%(class)s_name'),
+            models.UniqueConstraint(fields=["slug"], name='%(class)s_slug')
+        ]
+
+    def __str__(self):
+        return self.name
+
+
+
 
 class EducationalInstitution(BaseModel):
     '''
@@ -355,7 +420,12 @@ class EducationalInstitution(BaseModel):
         c - училище, колледж.
     '''
     name = models.CharField(blank=False, max_length=254, verbose_name="Образовательная организация")
-    category = models.CharField(blank=False, max_length=1, verbose_name="Функциональная категория")
+    category = models.ForeignKey('EducationalCategory', on_delete=models.PROTECT,
+                                 related_name='%(class)s_category',
+                                 limit_choices_to=Q(),
+                                 verbose_name="Функциональная категория образовательной организации")
+
+
 
     class Meta:
         verbose_name = "Образовательная организация"
@@ -381,9 +451,10 @@ class EducationalInstitution(BaseModel):
 
 class Student(Client):
     birth_date = models.DateField(blank=False, verbose_name="Дата рождения")
-    student_card_num = models.CharField(blank=False, max_length=20, verbose_name="Номер студенческого билета")
+    student_card_num = models.CharField(blank=False, max_length=254, verbose_name="Номер студенческого билета")
     edu_institution = models.ForeignKey('EducationalInstitution', on_delete=models.PROTECT,
-                                        related_name='%(class)s_edu_institution', limit_choices_to=get_edu_inst_category('u'),
+                                        related_name='%(class)s_edu_institution',
+                                        limit_choices_to=Q(category_slug='u'),
                                         verbose_name="Образовательная организация")
 
     class Meta:
@@ -409,14 +480,14 @@ class Student(Client):
 class PupilA(Client):
     confirm_benefit_doc_type = models.ForeignKey('DocumentType', on_delete=models.PROTECT,
                                                  related_name='%(class)s_benefit_doc',
-                                                 limit_choices_to=get_doc_categories('p'),
+                                                 limit_choices_to=Q(categories_slug='p'),
                                                  verbose_name="Вид документа подтверждающего льготу")
-    confirm_benefit_doc_num = models.CharField(blank=False, max_length=20,
+    confirm_benefit_doc_num = models.CharField(blank=False, max_length=254,
                                                verbose_name="Номер документа подтверждающего льготу")
     confirm_benefit_doc_date = models.DateField(blank=False, verbose_name="Дата выдачи документа")
     confirm_benefit_doc_edu_organization = models.ForeignKey('EducationalInstitution', on_delete=models.PROTECT,
                                                              related_name='%(class)s_edu_institution',
-                                                             limit_choices_to=get_edu_inst_category('s'),
+                                                             limit_choices_to=Q(category_slug='s'),
                                                              verbose_name="Образовательная организация")
 
     class Meta:
@@ -451,7 +522,7 @@ class Pupil(PupilA):
 
 
 class PupilMO(PupilA):
-    certificate_num = models.CharField(blank=False, max_length=20, verbose_name="Номер справки (МО семья)")
+    certificate_num = models.CharField(blank=False, max_length=254, verbose_name="Номер справки (МО семья)")
     certificate_date = models.DateField(blank=False, verbose_name="Дата выдачи справки (МО семья)")
     certificate_date_to = models.DateField(blank=False, verbose_name="Срок действия справки (МО семья)")
 
