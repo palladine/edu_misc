@@ -37,6 +37,37 @@ pip install -U pydantic[all]
             email: str = Field(..., alias='email_address')
 
 
+!
+Annotated в Pydantic предоставляет мощный механизм для расширения возможностей валидации 
+и настройки типов данных, не изменяя при этом базовый синтаксис аннотаций типов Python.
+
+        from typing import Annotated
+        from pydantic import BaseModel, Field, AfterValidator
+
+        PositiveInt = Annotated[int, Field(gt=0)]
+        TruncatedFloat = Annotated[float, AfterValidator(lambda x: round(x, 1))]
+
+        class MyModel(BaseModel):
+            age: PositiveInt
+
+        class AnotherModel(BaseModel):
+            value: TruncatedFloat # значение будет округлено до десятков
+
+
+
+Annotated используется с Field() или другими типами, предоставляемыми Pydantic 
+(например, StringConstraints) для определения ограничений и предоставления 
+дополнительной информации о поле.
+
+        from typing import Annotated
+        from pydantic import BaseModel, Field, StringConstraints
+
+        class User(BaseModel):
+            name: Annotated[str, Field(min_length=3, max_length=50)]
+            email: Annotated[str, StringConstraints(pattern=r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$")]
+
+
+
 
 Декоратор @field_validator — позволяет добавлять кастомную логику валидации поля. 
 Вызывается при создании или изменении модели. field_validator может быть использован 
