@@ -1,0 +1,48 @@
+
+----------------------------------- views.py ----------------------------------
+    from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+    
+    ...
+    def get(self, request):
+        posts = Post.published.all()
+
+        # pagination
+        paginator = Paginator(posts, 3)
+        page_number = request.GET.get('page', 1)
+        try:
+            posts = paginator.page(page_number)
+        except PageNotAnInteger:
+            posts = paginator.page(1)
+        except EmptyPage:
+            posts = paginator.page(paginator.num_pages)
+
+        return render(request, 'post/list.html', {'posts': posts})
+-------------------------------------------------------------------------------
+
+
+
+------------------------- template/pagination.html ----------------------------
+    <div class="pagination">
+        <span class="step-links">
+            {% if page.has_previous %}
+                <a href="?page={{ page.previous_page_number }}">Previous</a>
+            {% endif %}
+            <span class="current">
+                Page {{ page.number }} of {{ page.paginator.num_pages }}
+            </span>
+            {% if page.has_next %}
+                <a href="?page={{ page.next_page_number }}">Next</a>
+            {% endif %}
+        </span>
+    </div>
+-------------------------------------------------------------------------------
+
+
+
+------------------------------ post/list.html --------------------------------------
+    ...
+    
+    {% include "pagination.html" with page=posts %}
+    
+    ...
+-------------------------------------------------------------------------------
