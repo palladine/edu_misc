@@ -52,7 +52,7 @@ sudo systemctl enable mariadb
 
 5. Django
 ---------------------------------
-pip install Django==5.1.2, mysqlclient
+pip install Django==5.1.2, mysqlclient, psycopg
 
 git clone http://192.168.10.207/maksim/ais.git aisk
 - редактирование settings.py
