@@ -58,7 +58,7 @@ git clone http://192.168.10.207/maksim/ais.git aisk
 - редактирование settings.py
 |DATABASES = {
 |    'default': {
-|        'ENGINE': 'django.db.backends.mysql',
+|        'ENGINE': 'django.db.backends.mysql',    #  'ENGINE': 'django.db.backends.postgresql'
 |        'NAME': 'aisk_db',
 |        'USER': 'user_aisk',
 |        'PASSWORD': 'Wtynhnhfyc22',

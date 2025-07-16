@@ -66,3 +66,23 @@
 
     python manage.py squashmigrations <приложение> <от какой миграции свкошить>  <до какой>
     (python manage.py squashmigrations app 0005 0007)
+
+
+
+    # переход на другой сервер баз данных
+    
+        1. dumping / сохраняем данные
+        python -Xutf8 manage.py dumpdata --indent=4 --output=dump_data.json
+
+        2. добавляем новую БД в settings.py (секция DATABASES)
+
+        3. миграция (initial) в новую бд
+        python manage.py migrate 
+
+        4. восстановление данных из файла
+        python manage.py loaddata dum_data.json
+
+    
+    # shell
+
+    python manage.py shell
