@@ -6,7 +6,7 @@ from django.contrib.auth.hashers import make_password
 from .managers import UserManager
 from .crypto import encrypt, decrypt
 from django.core.exceptions import ValidationError
-
+import re
 
 
 
@@ -20,7 +20,32 @@ def exclude_fields(fields, exclude: set):
 # Validators
 def validate_string(value):
     if not value or not isinstance(value, str):
-        raise ValidationError(message=f'ValidationError')
+        raise ValidationError(message=f'ValidationError [TypeError]')
+
+def validate_only_chars(value):
+    if not value.isalpha():
+        raise ValidationError(message=f'ValidationError [StringFormatError]')
+
+def validate_string_phrase(value):
+    pattern = r'^[0-9a-zA-Zа-яА-ЯёЁ ]+$'
+    if not re.fullmatch(pattern, value):
+        raise ValidationError(message=f'ValidationError [StringFormatError]')
+
+def validate_string_slug(value):
+    pattern = r'^[a-z_]+$'
+    if not re.fullmatch(pattern, value):
+        raise ValidationError(message=f'ValidationError [StringFormatError]')
+
+def validate_only_digits(value):
+    if not value.isdigit():
+        raise ValidationError(message=f'ValidationError [StringFormatError]')
+
+def validate_only_valid_chars(value):
+    pattern = r'^[0-9a-zA-Zа-яА-ЯёЁ\"\\\\/№\s]+$'
+    if not re.fullmatch(pattern, value):
+        raise ValidationError(message=f'ValidationError [StringFormatError]')
+
+    return value
 
 # ----------------------------------------------------------------------------------------------------------------------
 
@@ -134,9 +159,11 @@ class AppUser(AbstractBaseUser, PermissionsMixin):
 # ---------------------------------------------- App's models ----------------------------------------------------------
 class CardType(BaseModel):
     name = models.CharField(blank=False, max_length=100, verbose_name="Тип транспортной карты",
-                            validators=[validate_string])
+                            validators=[validate_string, validate_string_phrase])
     slug = models.SlugField(blank=False, max_length=25, verbose_name="Метка",
-                            validators=[validate_string])
+                            validators=[validate_string, validate_string_slug])
+    categories = models.ManyToManyField('ApplicationType',
+                                        verbose_name="Категории обращений")
 
     class Meta:
         verbose_name = "Тип транспортной карты"
@@ -158,9 +185,9 @@ class CardType(BaseModel):
 
 class CardStatus(BaseModel):
     name = models.CharField(blank=False, max_length=100, verbose_name="Статус транспортной карты",
-                            validators=[validate_string])
+                            validators=[validate_string, validate_only_chars])
     slug = models.SlugField(blank=False, max_length=25, verbose_name="Метка",
-                            validators=[validate_string])
+                            validators=[validate_string, validate_only_chars])
 
     class Meta:
         verbose_name = "Статус транспортной карты"
@@ -189,7 +216,7 @@ class CardStatus(BaseModel):
 
 class Card(BaseModel):
     number = models.CharField(blank=False, max_length=10, verbose_name="Номер транспортной карты",
-                              validators=[validate_string])
+                              validators=[validate_string, validate_only_digits])
     card_type = models.ForeignKey('CardType', on_delete=models.PROTECT, verbose_name="Тип транспортной карты")
     card_status = models.ForeignKey('CardStatus', on_delete=models.PROTECT, default=CardStatus.get_default_pk,
                                     verbose_name="Статус транспортной карты")
@@ -215,8 +242,10 @@ class Card(BaseModel):
 
 
 class DocumentCategory(BaseModel):
-    name = models.CharField(blank=False, max_length=100, verbose_name="Категория документа")
-    slug = models.SlugField(blank=False, max_length=3, verbose_name="Метка")
+    name = models.CharField(blank=False, max_length=100, verbose_name="Категория документа",
+                            validators=[validate_string, validate_only_chars])
+    slug = models.SlugField(blank=False, max_length=3, verbose_name="Метка",
+                            validators=[validate_string, validate_only_chars])
 
     class Meta:
         verbose_name = "Категория документа"
@@ -247,8 +276,10 @@ class DocumentType(BaseModel):
             - документ подтверждающий социальную льготу,
             - документ подтверждающий проживание.
     '''
-    name = models.CharField(blank=False, max_length=100, verbose_name="Вид документа")
-    slug = models.SlugField(blank=False, max_length=25, verbose_name="Метка")
+    name = models.CharField(blank=False, max_length=100, verbose_name="Вид документа",
+                            validators=[validate_string, validate_only_chars])
+    slug = models.SlugField(blank=False, max_length=25, verbose_name="Метка",
+                            validators=[validate_string, validate_only_chars])
     categories = models.ManyToManyField('DocumentCategory',
                                         verbose_name="Функциональные категории документа")
 
@@ -272,7 +303,8 @@ class DocumentType(BaseModel):
 
 
 class JudicialBody(BaseModel):
-    name = models.CharField(blank=False, max_length=254, verbose_name="Наименование судебного органа")
+    name = models.CharField(blank=False, max_length=254, verbose_name="Наименование судебного органа",
+                            validators=[validate_string, validate_only_valid_chars])
 
     class Meta:
         verbose_name = "Cудебный орган"
@@ -292,22 +324,28 @@ class JudicialBody(BaseModel):
 
 
 class Client(BaseModel):
-    last_name = models.CharField(blank=False, max_length=254, verbose_name="Фамилия")
-    first_name = models.CharField(blank=False, max_length=254, verbose_name="Имя")
+    last_name = models.CharField(blank=False, max_length=254, verbose_name="Фамилия",
+                                 validators=[validate_string, validate_only_chars])
+    first_name = models.CharField(blank=False, max_length=254, verbose_name="Имя",
+                                  validators=[validate_string, validate_only_chars])
     middle_name = models.CharField(null=True, blank=True, max_length=254, verbose_name="Отчество")
 
     doc_type = models.ForeignKey('DocumentType', on_delete=models.PROTECT,
                                  limit_choices_to=Q(categories_slug='i'),
                                  related_name='%(class)s_doc', verbose_name="Документ удостоверяющий личность")
-    doc_serie = models.CharField(blank=False, max_length=254, verbose_name="Серия документа")
-    doc_number = models.CharField(blank=False, max_length=254, verbose_name="Номер документа")
+    doc_serie = models.CharField(blank=False, max_length=254, verbose_name="Серия документа",
+                                 validators=[validate_string, validate_only_valid_chars])
+    doc_number = models.CharField(blank=False, max_length=254, verbose_name="Номер документа",
+                                  validators=[validate_string, validate_only_valid_chars])
     doc_date = models.DateField(blank=False, verbose_name="Дата выдачи документа")
-    doc_issuedby = models.CharField(blank=False, max_length=254, verbose_name="Документ выдан")
+    doc_issuedby = models.CharField(blank=False, max_length=254, verbose_name="Документ выдан",
+                                    validators=[validate_string, validate_only_valid_chars])
 
     card_active = models.ForeignKey('Card', on_delete=models.PROTECT, related_name='%(class)s_card_active', verbose_name="Действующая транспортная карта")
     card_old = models.ForeignKey('Card', null=True, blank=True, on_delete=models.PROTECT, related_name='%(class)s_card_old', verbose_name="Cтарая транспортная карта")
 
-    reestr_number = models.CharField(blank=False, max_length=30, verbose_name="Номер реестра")
+    reestr_number = models.CharField(blank=False, max_length=30, verbose_name="Номер реестра",
+                                     validators=[validate_string, validate_only_valid_chars])
 
     class Meta:
         abstract = True
@@ -324,18 +362,27 @@ class Client(BaseModel):
             models.UniqueConstraint(fields=["last_name", "first_name", "doc_serie", "doc_number"], name='%(class)s_info_const')
         ]
 
+    def get_fullname(self):
+        res = f'{decrypt(self.last_name)} {decrypt(self.first_name)}'
+        if self.middle_name:
+            res += f' {decrypt(self.middle_name)}'
+        return res.strip()
+
 
 
 
 
 class Pensioner(Client):
     birth_date = models.DateField(blank=False, verbose_name="Дата рождения")
-    sex = models.CharField(blank=False, max_length=4, verbose_name="Пол")
-    address = models.CharField(blank=False, max_length=254, verbose_name="Адрес проживания")
+    sex = models.CharField(blank=False, max_length=4, verbose_name="Пол",
+                           validators=[validate_string, validate_only_chars])
+    address = models.CharField(blank=False, max_length=254, verbose_name="Адрес проживания",
+                               validators=[validate_string, validate_only_valid_chars])
     confirm_addr_doc_type = models.ForeignKey('DocumentType', on_delete=models.PROTECT, related_name='%(class)s_addr_doc',
                                               limit_choices_to=Q(categories_slug='a'),
                                               verbose_name="Вид документа подтверждающего проживание")
-    confirm_addr_doc_num = models.CharField(null=True, blank=True, max_length=254, verbose_name="Номер документа подтверждающего проживание")
+    confirm_addr_doc_num = models.CharField(null=True, blank=True, max_length=254,
+                                            verbose_name="Номер документа подтверждающего проживание")
     confirm_addr_doc_from = models.DateField(null=True, blank=True, verbose_name="Документ действует от")
     confirm_addr_doc_to = models.DateField(null=True, blank=True, verbose_name="Документ действует до")
     confirm_addr_doc_judicial_body = models.ForeignKey('JudicialBody', null=True, blank=True, on_delete=models.PROTECT,
@@ -364,9 +411,12 @@ class Beneficiary(Client):
     confirm_benefit_doc_type = models.ForeignKey('DocumentType', on_delete=models.PROTECT, related_name='%(class)s_benefit_doc',
                                               limit_choices_to=Q(categories_slug='l'),
                                               verbose_name="Вид документа подтверждающего льготу")
-    confirm_benefit_doc_num = models.CharField(blank=False, max_length=254, verbose_name="Номер документа подтверждающего льготу")
+    confirm_benefit_doc_num = models.CharField(blank=False, max_length=254,
+                                               verbose_name="Номер документа подтверждающего льготу",
+                                               validators=[validate_string, validate_only_valid_chars])
     confirm_benefit_doc_date = models.DateField(blank=False, verbose_name="Дата выдачи документа")
-    lic = models.CharField(blank=False, max_length=20, verbose_name="Лицевой счет")
+    lic = models.CharField(blank=False, max_length=20, verbose_name="Лицевой счет",
+                           validators=[validate_string, validate_only_digits])
     #  1 - льготник, 0 - сопровождающий
     status_beneficiary = models.BooleanField(default=True, verbose_name="Статус льготника")
 
@@ -390,8 +440,10 @@ class Beneficiary(Client):
 
 
 class EducationalCategory(BaseModel):
-    name = models.CharField(blank=False, max_length=100, verbose_name="Категория образовательной организации")
-    slug = models.SlugField(blank=False, max_length=3, verbose_name="Метка")
+    name = models.CharField(blank=False, max_length=100, verbose_name="Категория образовательной организации",
+                            validators=[validate_string, validate_only_chars])
+    slug = models.SlugField(blank=False, max_length=3, verbose_name="Метка",
+                            validators=[validate_string, validate_only_chars])
 
     class Meta:
         verbose_name = "Категория образовательной организации"
@@ -419,7 +471,8 @@ class EducationalInstitution(BaseModel):
         u - ВУЗ,
         c - училище, колледж.
     '''
-    name = models.CharField(blank=False, max_length=254, verbose_name="Образовательная организация")
+    name = models.CharField(blank=False, max_length=254, verbose_name="Образовательная организация",
+                            validators=[validate_string, validate_only_valid_chars])
     category = models.ForeignKey('EducationalCategory', on_delete=models.PROTECT,
                                  related_name='%(class)s_category',
                                  limit_choices_to=Q(),
@@ -451,7 +504,8 @@ class EducationalInstitution(BaseModel):
 
 class Student(Client):
     birth_date = models.DateField(blank=False, verbose_name="Дата рождения")
-    student_card_num = models.CharField(blank=False, max_length=254, verbose_name="Номер студенческого билета")
+    student_card_num = models.CharField(blank=False, max_length=254, verbose_name="Номер студенческого билета",
+                                        validators=[validate_string, validate_only_valid_chars])
     edu_institution = models.ForeignKey('EducationalInstitution', on_delete=models.PROTECT,
                                         related_name='%(class)s_edu_institution',
                                         limit_choices_to=Q(category_slug='u'),
@@ -483,7 +537,8 @@ class PupilA(Client):
                                                  limit_choices_to=Q(categories_slug='p'),
                                                  verbose_name="Вид документа подтверждающего льготу")
     confirm_benefit_doc_num = models.CharField(blank=False, max_length=254,
-                                               verbose_name="Номер документа подтверждающего льготу")
+                                               verbose_name="Номер документа подтверждающего льготу",
+                                               validators=[validate_string, validate_only_valid_chars])
     confirm_benefit_doc_date = models.DateField(blank=False, verbose_name="Дата выдачи документа")
     confirm_benefit_doc_edu_organization = models.ForeignKey('EducationalInstitution', on_delete=models.PROTECT,
                                                              related_name='%(class)s_edu_institution',
@@ -522,7 +577,8 @@ class Pupil(PupilA):
 
 
 class PupilMO(PupilA):
-    certificate_num = models.CharField(blank=False, max_length=254, verbose_name="Номер справки (МО семья)")
+    certificate_num = models.CharField(blank=False, max_length=254, verbose_name="Номер справки (МО семья)",
+                                       validators=[validate_string, validate_only_valid_chars])
     certificate_date = models.DateField(blank=False, verbose_name="Дата выдачи справки (МО семья)")
     certificate_date_to = models.DateField(blank=False, verbose_name="Срок действия справки (МО семья)")
 
@@ -543,12 +599,14 @@ class PupilMO(PupilA):
 
 
 class ApplicationType(BaseModel):
-    name = models.CharField(blank=False, max_length=100, verbose_name="Тип обращения")
-    slug = models.SlugField(blank=False, max_length=25, verbose_name="Метка")
+    name = models.CharField(blank=False, max_length=100, verbose_name="Вид обращения",
+                            validators=[validate_string, validate_string_phrase])
+    slug = models.SlugField(blank=False, max_length=25, verbose_name="Метка",
+                            validators=[validate_string, validate_string_slug])
 
     class Meta:
-        verbose_name = "Тип обращения"
-        verbose_name_plural = "Типы обращений"
+        verbose_name = "Вид обращения"
+        verbose_name_plural = "Виды обращений"
         ordering = ['name']
 
         db_table = 'application_type'
@@ -566,10 +624,12 @@ class ApplicationType(BaseModel):
 
 class Application(BaseModel):
     application_type = models.ForeignKey('ApplicationType', on_delete=models.PROTECT,
-                                                 related_name='%(class)s_app_type', verbose_name="Тип обращения")
-    app_card_new = models.CharField(blank=False, max_length=10, verbose_name="Новая транспортная карта")
-    app_card_old = models.CharField(null=False, blank=True, max_length=10, default='', verbose_name="Старая транспортная карта")
-
+                                                 related_name='%(class)s_app_type', verbose_name="Вид обращения")
+    app_card_new = models.CharField(blank=False, max_length=10, verbose_name="Новая транспортная карта",
+                                    validators=[validate_string, validate_only_digits])
+    app_card_old = models.CharField(null=False, blank=True, max_length=10, default='',
+                                    verbose_name="Старая транспортная карта",
+                                    validators=[validate_string, validate_only_digits])
     comment = models.TextField(null=False, blank=True, default='', verbose_name="Дополнительные сведения")
     datetime_creation = models.DateTimeField(blank=False, auto_now_add=True, verbose_name="Дата создания обращения")
     user_created = models.ForeignKey('AppUser', on_delete=models.PROTECT, verbose_name="Пользователь")
