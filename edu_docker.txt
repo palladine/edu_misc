@@ -293,6 +293,34 @@ Docker-compose — это утилита, позволяющая запуска�
             driver: bridge
 
 
+пример БД postgres:
+    services:
+        db:
+        image: postgres:17.5
+        container_name: postgres_aisk
+        environment:
+            POSTGRES_USER: postgres
+            POSTGRES_PASSWORD: postgres
+            POSTGRES_DB: aisk_db
+            POSTGRES_INITDB_ARGS: "--encoding=UTF8 --lc-collate=C --lc-ctype=C"
+        ports:
+            - "5432:5432"
+        volumes:
+            - postgres_data:/var/lib/postgresql/data
+            # Раскомментируйте для инициализации БД дампом:
+            # - ./ttpsbo_dump.sql:/docker-entrypoint-initdb.d/ttpsbo_dump.sql
+        restart: unless-stopped
+        healthcheck:
+            test: ["CMD-SHELL", "pg_isready -U postgres -d aisk_db"]
+            interval: 30s
+            timeout: 10s
+            retries: 3
+
+    volumes:
+        postgres_data:
+
+
+
     - Запуск docker-compose.yml 
         
         docker compose up -d
