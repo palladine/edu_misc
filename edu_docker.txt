@@ -293,3 +293,6 @@ Docker-compose — это утилита, позволяющая запуска�
             driver: bridge
 
 
+    - Запуск docker-compose.yml 
+        
+        docker compose up -d
