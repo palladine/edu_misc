@@ -1,0 +1,32 @@
+---------------------------------------------------------------------------
+Ответ с использованием моделей Pydantic
+
+pydantic - схема
+class User(BaseModel):
+    name: str
+    age: int
+
+@app.post('/add_user', response_model=User)  # Указываем модель для ответа
+async def add_user(user: User):            # user получаем из запроса http
+    ...
+    return user           # Возвращаем добавленного пользователя в формате, 
+                            указанном в response_model
+---------------------------------------------------------------------------
+
+---------------------------------------------------------------------------
+Кастомная валидация полей
+
+from pydantic import BaseModel, Field, field_validator, ValidationError
+
+
+class Feedback(BaseModel):
+    name: str = Field(min_length=2, max_length=50)
+    message: str = Field(min_length=10, max_length=500)
+
+    @field_validator('message')
+    @classmethod    
+    # В Pydantic 2.x методы валидаторов должны быть классовыми
+    def validate_name(cls, value):
+        if not value.isalnum():
+            raise ValueError('Name must be alphanumeric')
+        return value.lower() # Пример изменения значения
