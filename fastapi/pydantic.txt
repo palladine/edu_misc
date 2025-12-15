@@ -13,6 +13,24 @@ async def add_user(user: User):            # user получаем из запр
                             указанном в response_model
 ---------------------------------------------------------------------------
 
+
+---------------------------------------------------------------------------
+Получение и ответ с разными схемами pydantic
+
+class User(BaseModel):
+    name: str
+    age: int
+
+class UserResponse(BaseModel):
+    message: str
+    user: User                    # ! вложенная схема User
+
+@app.post("/users/", response_model=UserResponse)   # ответ
+async def create_user(user: User):                  # вход
+    return {"message": f"Пользователь {user.name} создан!", "user": user}
+---------------------------------------------------------------------------
+
+
 ---------------------------------------------------------------------------
 Кастомная валидация полей
 

@@ -1,0 +1,121 @@
+---------------------------------------------------------------------------
+Получение данных с формы
+    
+    - форма
+    <form action="http://127.0.0.1:8000/submit_form/" method="post">
+        <input type="text" name="username" placeholder="Имя пользователя" required>
+        <input type="email" name="email" placeholder="Email" required>
+        <input type="number" name="age" placeholder="Возраст" required>
+        <input type="password" name="password" placeholder="Пароль" required>
+        <button type="submit">Go</button>
+    </form>
+
+    - 
+    from fastapi import FastAPI, Form, Request
+    from fastapi.responses import HTMLResponse
+    import uvicorn
+    from schemas.main_schemas import User
+    from fastapi.templating import Jinja2Templates
+
+
+    app = FastAPI()
+    templates = Jinja2Templates(directory='templates')
+
+    @app.get('/')
+    async def show(request: Request):
+        return templates.TemplateResponse("base_form.html", context={"request": request})
+
+
+    @app.post('/submit_form')
+    async def sub_form(
+        username: str = Form(...),
+        email: str = Form(...),
+        age: int = Form(...),
+        password: str = Form(...)
+    ):
+        user = User(
+            username=username,
+            email=email,
+            age=age,
+            password=password,
+        )
+        return {'name': user.username, 'age': user.email}
+
+
+    if __name__ == "__main__":
+        uvicorn.run("main:app", host='127.0.0.1', port=8000, reload=True)
+---------------------------------------------------------------------------
+
+
+---------------------------------------------------------------------------
+Обработка загрузки файлов на сервер
+
+Пример загрузки файлов:
+# main.py
+from typing import Annotated
+from fastapi import FastAPI, File, UploadFile
+
+app = FastAPI()
+
+@app.post("/files/")
+async def create_file(file: Annotated[bytes, File()]):
+    return {"file_size": len(file)}
+
+@app.post("/uploadfile/")
+async def create_upload_file(file: UploadFile):
+    return {"filename": file.filename}
+
+
+Разница между File и UploadFile
+File: загружает только содержимое файла в виде bytes, то есть в оперативную память. 
+UploadFile: позволяет работать с файлами более эффективно, так как использует 
+временные файлы. Даёт доступ к метаинформации файла, такой как имя, 
+тип (file.content_type) и метод file.read(), позволяющий читать файл частями.
+
+
+Обработка UploadFile
+При использовании UploadFile можно работать с файлами построчно или читать их частями:
+
+@app.post("/uploadfile/")
+async def create_upload_file(file: UploadFile):
+    content = await file.read()  # Читаем весь файл в память
+    return {"filename": file.filename, "size": len(content)}
+
+                  
+Если файлы большие - можно читать их порциями:
+
+@app.post("/uploadfile/")
+async def create_upload_file(file: UploadFile):
+    with open(file.filename, "wb") as f:
+        while chunk := await file.read(1024):  # Читаем по 1 КБ
+            f.write(chunk)
+    return {"filename": file.filename}
+
+
+Загрузка нескольких файлов
+
+# main.py
+from typing import List
+
+@app.post("/multiple-files/")
+async def upload_multiple_files(files: List[UploadFile]):
+    return {"filenames": [file.filename for file in files]}
+
+
+HTML-форма:
+<form action="http://127.0.0.1:8000/multiple-files/" method="post" enctype="multipart/form-data">
+    <input type="file" name="files" multiple>
+    <button type="submit">Отправить</button>
+</form>
+
+                  
+Ограничение типов файлов
+Чтобы ограничить загрузку определёнными типами файлов (например, только изображения),
+можно проверять file.content_type:
+
+@app.post("/upload-image/")
+async def upload_image(file: UploadFile):
+    if file.content_type not in ["image/jpeg", "image/png"]:
+        return {"error": "Только JPG и PNG разрешены"}
+    return {"filename": file.filename, "content_type": file.content_type}
+---------------------------------------------------------------------------

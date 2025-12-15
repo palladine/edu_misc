@@ -16,6 +16,18 @@ async def get_all_ysers():
 async def get_user(user_id: int):       # указали тип данных
     ...
     return ...
+
+Расширение параметров пути
+from fastapi import Query
+
+@app.get("/users/{name}")
+async def users(
+    name: str = Path(...)
+):
+    return {"name": name}
+
+Возможности
+pattern, min_length, max_length, gt, ge, lt, le
 ---------------------------------------------------------------------------
 
 
@@ -29,12 +41,51 @@ async def get_user(user_id: int):       # указали тип данных
 async def add_user(username: str, age: int):
     ...
     return ...
+
+
+Расширение параметров запроса
+from fastapi import Query
+
+@app.post('/add_user')
+async def add_user(
+    username: str = Query(...)
+): ...
+
+
+Возможности класса Query:
+alias, pattern (проверка на регулярку), min_length, max_length, gt, ge, lt, le
+
+
+Получение параметров в словарь
+@app.get('/products/search')
+async def get_products_limit(request: Request):
+    params = dict(request.query_params)
+    ...
 ---------------------------------------------------------------------------
 
 
 ---------------------------------------------------------------------------
 3. Параметры тела запроса (Body Parameters)
 Параметры тела запроса передаются в теле HTTP-запроса, обычно в формате JSON.
+
+from pydantic import BaseModel
+
+class User(BaseModel):
+    name: str
+    email: str
+
+@app.post("/")
+async def func_with_body_param(user: User):
+    ...
+    return ...
+
+Расширение параметров тела запроса
+from fastapi import Body
+
+@app.post("/")
+async def func_with_body_param(
+    user:User = Body()
+): ...
 ---------------------------------------------------------------------------
 
 
