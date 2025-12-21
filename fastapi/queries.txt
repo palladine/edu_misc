@@ -89,4 +89,29 @@ async def func_with_body_param(
 ---------------------------------------------------------------------------
 
 
+---------------------------------------------------------------------------
+4. Заголовки запросов headers
+
+from fastapi import FastAPI, Header
+
+app = FastAPI()
+
+@app.get("/items/")
+async def read_items(user_agent: str|None = Header(default=None)):
+    return {"User-Agent": user_agent}
+
+user_agent — это стандартный Python-стиль, 
+но FastAPI преобразует его в User-Agent при извлечении из запроса.
+
+
+ответ
+from fastapi import FastAPI, Response
+
+app = FastAPI()
+
+@app.get("/")
+def root(response: Response):
+    response.headers["Secret-Code"] = "123459"
+    return {"message": "Hello from my api"}
+---------------------------------------------------------------------------
 
