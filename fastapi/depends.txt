@@ -1,0 +1,14 @@
+Класс Depends говорит обработчику маршрута, что перед выполнением основного кода маршрута 
+нужно сначала обработать зависимость. В него передается объект, который можно вызвать 
+(обычно это функция, но может быть и класс с методом __call__). 
+
+from fastapi import FastAPI, Depends
+...
+def my_dependency():
+    return "Зависимость выполнена"
+
+@app.get("/")
+def read_root(data=Depends(my_dependency)):
+    return {"message": data}
+...
+
