@@ -1,0 +1,12 @@
+Настройка и использование
+Конфигурация: В alembic.ini укажите путь к БД в переменной sqlalchemy.url.
+Автогенерация: В env.py настройте target_metadata, указав Base.metadata ваших моделей SQLAlchemy.
+Применение: Используйте upgrade() для описания изменений (добавление колонок, таблиц) и downgrade() для их отмены. 
+
+
+alembic init -t async migrations                        # Инициализация - создает папку конфигурации
+alembic revision --autogenerate -m 'Initial revision'   # Создание миграции (автоматически на основе моделей SQLAlchemy)
+alembic upgrade head                                    # применение всех новых миграций
+alembic current                                         # текущая версия БД
+alembic downgrade -1                                    # откат последней миграции
+
