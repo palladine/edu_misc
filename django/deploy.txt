@@ -133,7 +133,7 @@ sudo service supervisor restart
 -----------------------------------------
 sudo apt install nginx
 
-sudo touch /etc/nginx/sites-available/proj
+sudo touch /etc/nginx/sites-available/proj.conf
 
 | server {
 |     listen 9001;
@@ -153,9 +153,11 @@ sudo touch /etc/nginx/sites-available/proj
 |     }
 | }
 
-sudo ln -s /etc/nginx/sites-available/proj /etc/nginx/sites-enabled/
+sudo ln -s /etc/nginx/sites-available/proj.conf /etc/nginx/sites-enabled/
 sudo service nginx restart (reload)
 
+sudo systemctl enable --now nginx
+sudo systemctl status nginx
 
 
 ! После обновления версии python !
