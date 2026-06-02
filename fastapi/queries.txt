@@ -12,22 +12,19 @@ async def get_all_ysers():
 1. Параметры пути (Path Parameters)
 /users/{user_id}, где {user_id} — это параметр пути.
 
-@app.get('/users/{user_id}') 
-async def get_user(user_id: int = Path(...)):       # указали тип данных
-    ...
-    return ...
+    a)
+        @app.get('/users/{user_id}')
+        async def get_user(user_id: int):
+            ...
+    
+    b)
+        from fastapi import Path
+        @app.get('/users/{user_id}') 
+        async def get_user(user_id: int = Path(...)):       # указали тип данных
+            ...
 
-Расширение параметров пути
-from fastapi import Query
-
-@app.get("/users/{name}")
-async def users(
-    name: str = Path(...)
-):
-    return {"name": name}
-
-Возможности
-pattern, min_length, max_length, gt, ge, lt, le
+        Валидация в Path
+        pattern, min_length, max_length, gt, ge, lt, le
 ---------------------------------------------------------------------------
 
 
@@ -37,81 +34,71 @@ pattern, min_length, max_length, gt, ge, lt, le
 (пример http://127.0.0.1:8000/add_user?name=John&age=24)
 Для POST - это неверно.
 
-@app.post('/add_user')
-async def add_user(username: str, age: int):
-    ...
-    return ...
+    a)
+        @app.get('/add_user')
+        async def get_user(name: str, age: int):
+            ...
 
+    b)
+        from fastapi import Query
+        @app.get('/add_user')
+        async def add_user(
+            name: str = Query(...),
+            age: int = Query(...)
+        ): ...
 
-Расширение параметров запроса
-from fastapi import Query
+        Возможности класса Query:
+        alias, pattern (проверка на регулярку), min_length, max_length, gt, ge, lt, le
 
-@app.post('/add_user')
-async def add_user(
-    username: str = Query(...)
-): ...
-
-
-Возможности класса Query:
-alias, pattern (проверка на регулярку), min_length, max_length, gt, ge, lt, le
-
-
-Получение параметров в словарь
-@app.get('/products/search')
-async def get_products_limit(request: Request):
-    params = dict(request.query_params)
-    ...
+    c)
+        Получение параметров в словарь
+        @app.get('/products/search')
+        async def get_products(request: Request):
+            params = dict(request.query_params)
+            ...
 ---------------------------------------------------------------------------
 
 
 ---------------------------------------------------------------------------
 3. Параметры тела запроса (Body Parameters)
 Параметры тела запроса передаются в теле HTTP-запроса, обычно в формате JSON.
+Тело запроса используется для отправки данных на сервер при создании (POST) 
+или обновлении (PUT или PATCH).
 
-from pydantic import BaseModel
+    a)
+        from fastapi import Body
+        @app.post("/new_user")
+        async def creat_user(user_id: int = Body(embed=True)):
+            ...
 
-class User(BaseModel):
-    name: str
-    email: str
-
-@app.post("/")
-async def func_with_body_param(user: User):
-    ...
-    return ...
-
-Расширение параметров тела запроса
-from fastapi import Body
-
-@app.post("/")
-async def func_with_body_param(
-    user:User = Body()
-): ...
+        Выражение Body(embed=True) требуется для того, чтобы сообщить FastAPI, 
+        что получаемое значение из тела запроса в формате JSON.
 ---------------------------------------------------------------------------
 
 
 ---------------------------------------------------------------------------
 4. Заголовки запросов headers
 
-from fastapi import FastAPI, Header
+    a)
+        from fastapi import Header
+        @app.post("/new_user")
+        async def creat_user(user_id: int|None = Header(default=None)):
+            ...
 
-app = FastAPI()
+    b)  возврат заголовка (на примере User-Agent)
+        (user_agent — это стандартный Python-стиль, но FastAPI преобразует 
+        его в User-Agent при извлечении из запроса.)
+        
+        @app.post("/agent")
+        def get_agent(user_agent: str = Header()):
+            return user_agent
 
-@app.get("/items/")
-async def read_items(user_agent: str|None = Header(default=None)):
-    return {"User-Agent": user_agent}
+    c)  добавление заголовка в ответ
 
-user_agent — это стандартный Python-стиль, 
-но FastAPI преобразует его в User-Agent при извлечении из запроса.
-
-
-ответ
-from fastapi import FastAPI, Response
-
-app = FastAPI()
-
-@app.get("/")
-def root(response: Response):
-    response.headers["Secret-Code"] = "123459"
-    return {"message": "Hello from my api"}
+        from fastapi import Response
+        @app.get("/")
+        def root(response: Response):
+            response.headers["Secret-Code"] = "123459"
+            return {"message": "Hello from my api"}
 ---------------------------------------------------------------------------
 
