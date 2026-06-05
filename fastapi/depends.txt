@@ -2,13 +2,30 @@
 нужно сначала обработать зависимость. В него передается объект, который можно вызвать 
 (обычно это функция, но может быть и класс с методом __call__). 
 
-from fastapi import FastAPI, Depends
-...
-def my_dependency():
-    return "Зависимость выполнена"
+    from fastapi import FastAPI, Depends
+    ...
+    def my_dependency():
+        return "Зависимость выполнена"
 
-@app.get("/")
-def read_root(data=Depends(my_dependency)):
-    return {"message": data}
-...
+    @app.get("/")
+    def read_root(data=Depends(my_dependency)):
+        return {"message": data}
+
+
+    a)  Если функция зависимости просто проверяет что-то и не возвращает никаких 
+    значений, то можно определить зависимость в декораторе пути:
+
+        @app.method(url, dependencies=[Depends(depfunc)])
+
+
+    b) для всех функций пути объекта router:
+
+        from fastapi import APIRouter
+        router = APIRouter(..., dependencies=[Depends(depfunc)])
+
+
+    c) для всего приложения
+
+        app = FastAPI(dependencies=[Depends(depfunc1), Depends(depfunc2)])
+
 
