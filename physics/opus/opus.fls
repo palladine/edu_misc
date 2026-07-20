@@ -149,6 +149,10 @@ INPUT ./01.png
 INPUT ./01.png
 INPUT ./01.png
 INPUT ./01.png
+INPUT ./02.png
+INPUT ./02.png
+INPUT ./02.png
+INPUT ./02.png
 INPUT opus.aux
 INPUT /usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi12.pfb
 INPUT /usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb

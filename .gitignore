@@ -13,3 +13,4 @@ __pycache__
 test*.*
 *.exe
 .venv
+.DS_store
