@@ -1,6 +1,6 @@
 # Fdb version 4
-["pdflatex"] 1784733956.33494 "/Users/maksim/Desktop/projects/misc/physics/opus/opus.tex" "opus.pdf" "opus" 1784733957.08775 0
-  "/Users/maksim/Desktop/projects/misc/physics/opus/opus.tex" 1784733956.10652 10237 a381067d4cd2da8f2c213f1e7c2f9f47 ""
+["pdflatex"] 1785247420.33527 "/Users/maksim/Desktop/projects/misc/physics/opus/opus.tex" "opus.pdf" "opus" 1785247421.3471 0
+  "/Users/maksim/Desktop/projects/misc/physics/opus/opus.tex" 1785247420.10578 14580 4bc8f0b337075683f227072a28e2ca3e ""
   "/Users/maksim/Library/texlive/2025/texmf-var/fonts/tfm/lh/lh-t2a/labx1440.tfm" 1783260333.32216 3304 6a543c07045572737981351171e0505e ""
   "/Users/maksim/Library/texlive/2025/texmf-var/fonts/tfm/lh/lh-t2a/labx1728.tfm" 1782920471.72289 3312 d199be9bd555944e2403193d58a0256a ""
   "/Users/maksim/Library/texlive/2025/texmf-var/fonts/tfm/lh/lh-t2a/larm0600.tfm" 1783738926.34392 3248 7c0b9d76a2cd84ed06764a4c6eea5de4 ""
@@ -28,6 +28,7 @@
   "/usr/local/texlive/2025/texmf-dist/fonts/tfm/public/cm/cmsy6.tfm" 1136768653 1116 933a60c408fc0a863a92debe84b2d294 ""
   "/usr/local/texlive/2025/texmf-dist/fonts/tfm/public/cm/cmsy8.tfm" 1136768653 1120 8b7d695260f3cff42e636090a8002094 ""
   "/usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi12.pfb" 1248133631 36741 fa121aac0049305630cf160b86157ee4 ""
+  "/usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi8.pfb" 1248133631 35469 70d41d2b9ea31d5d813066df7c99281c ""
   "/usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb" 1248133631 32722 d7379af29a190c3f453aba36302ff5a9 ""
   "/usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb" 1248133631 32726 0a1aea6fcd6468ee2cf64d891f5c43c8 ""
   "/usr/local/texlive/2025/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb" 1248133631 32569 5e5ddc8df908dea60932f3c484a54c0d ""
@@ -88,8 +89,11 @@
   "/usr/local/texlive/2025/texmf.cnf" 1741450484 577 418a7058ec8e006d8704f60ecd22c938 ""
   "01.png" 1784475317.48164 6207 5cc23439ad440778cfbe95d6840b8d53 ""
   "02.png" 1784558275.10265 45450 6ad158003462f076b9fe18e63cd77469 ""
-  "opus.aux" 1784733956.9982 714 d15915510e12adf34310e63619f9772b "pdflatex"
-  "opus.tex" 1784733956.10652 10237 a381067d4cd2da8f2c213f1e7c2f9f47 ""
+  "03.png" 1784898247.92493 22423 65d07cf4b60d337ca69c43311a8dc455 ""
+  "04.png" 1785158397.54531 928153 8d35f70e9462b78891e4ad42153cebd2 ""
+  "05.png" 1785246284.40339 23822 25408051863bbfc4ee8d5d61faf24718 ""
+  "opus.aux" 1785247421.24844 1261 68fd3f51653d4b00c7342cd3939ef52d "pdflatex"
+  "opus.tex" 1785247420.10578 14580 4bc8f0b337075683f227072a28e2ca3e ""
   (generated)
   "opus.aux"
   "opus.log"
