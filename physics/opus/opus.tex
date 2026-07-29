@@ -245,11 +245,11 @@
 		производят разложение векторов по направлениям осей какой-либо 
 		прямоугольной системы координат.
 
-        \begin{wrapfigure}{l}{0.5\textwidth} % r = right
+        \begin{wrapfigure}{l}{0.43\textwidth} % r = right
             \vspace{-2pt}
             \centering
             % \includegraphics[width=0.46\textwidth]{01}
-            \includegraphics[scale=.9]{05}
+            \includegraphics[scale=.95]{05}
 			\captionsetup{width=0.35\textwidth}
             \caption{Проекция вектора на координатные оси}
             \label{fig:05}
@@ -264,5 +264,24 @@
         
         Проекции называют также компонентами вектора по координатным осям. Проекции 
         (компоненты) являются скалярами.
+
+		Проекция вектора на ось определяется формулой:
+		\begin{equation}
+			a_x = a \cos \alpha
+		\end{equation}
+
+		где $a$ - модуль вектора, $\alpha$ - угол между направлениями вектора и оси $x$.
+
+		Если $\alpha < \pi/2$, то $a_x > 0$.
+		Если $\alpha > \pi/2$, то $a_x < 0$.
+		Если $\alpha = \pi/2$, то $a_x = 0$.
+
+		Модуль определяется формулой
+
+		\begin{equation}
+			a = \sqrt{a_x^2+a_y^2}
+		\end{equation}
+
+
 
 \end{document}
