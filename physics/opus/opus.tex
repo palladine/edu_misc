@@ -279,7 +279,7 @@
 
 		Проекция вектора на ось определяется формулой:
 		\begin{equation}
-			a_x = a \cos \alpha
+			a_x = a \cdot \cos \alpha
 		\end{equation}
 
 		где $a$ - модуль вектора, $\alpha$ - угол между направлениями вектора и оси $x$.
@@ -384,7 +384,7 @@
 
 		\begin{equation}
 			\label{eq:f16}
-			R = \sqrt{F_1^2+F_2^2+2*F_1*F_2*\cos{(\alpha)}}
+			R = \sqrt{F_1^2+F_2^2+2 \cdot F_1 \cdot F_2 \cdot \cos{(\alpha)}}
 		\end{equation}
 
 
@@ -688,43 +688,69 @@
 		Если известны гипотенуза и один острый угол между гипотенузой и катетом, 
 		то катеты находятся через тригонометрические функции.
 
-		Катет, прилежащий к углу $\alpha$: $a = c * \cos \alpha$
+		Катет, прилежащий к углу $\alpha$: $a = c \cdot \cos \alpha$
 
-		Катет, прилежащий к углу $\alpha$: $b = c * \sin \alpha$
+		Катет, прилежащий к углу $\alpha$: $b = c \cdot \sin \alpha$
 		
-		\begin{wrapfigure}{l}{0.5\textwidth} % r = right
-			\vspace{0pt}
+		\begin{wrapfigure}[11]{l}{0.5\textwidth} % r = right
+			\vspace{-15pt}
 			\centering
 			\includegraphics[scale=0.7]{09}
 			\captionsetup{width=0.35\textwidth}
 			\caption{}
 			\label{fig:09}
 		\end{wrapfigure}
-		\vspace{0pt}
-
-		\
 
 		Используя тригонометрические функции найдем чему равны стороны 
 		треугольника $\bigtriangleup{ACG}$ (рис.~\ref{fig:09}):
 
 		$AC$ - гипотенуза
 
-		$AF = CG = AC * \sin \alpha$ 
+		$AF = CG = AC \cdot \sin \alpha$ 
 
-		$AG = FC = AC * \cos \alpha$
+		$AG = FC = AC \cdot \cos \alpha$
 
 		Используя правило нахождения величин сторон (катетов) в прямоугольном 
 		треугольнике, можно находить величины составляющих сил. Например, сила
 		тяжести действующая на тело на наклонной поверхности (рис.~\ref{fig:10})
 
-		\begin{wrapfigure}{l}{1\textwidth} % r = right
-			\vspace{0pt}
+		\begin{figure}[htbp]
 			\centering
-			\includegraphics[scale=0.4]{10}
+			\includegraphics[scale=0.3]{10}
 			\captionsetup{width=0.35\textwidth}
 			\caption{}
 			\label{fig:10}
-		\end{wrapfigure}
-		\vspace{0pt}
+		\end{figure}
+
+
+		\vspace{10\baselineskip}
+		\paragraph{Тело, закрепленное на оси.} \
+
+		\textit{Сила действующая на тело, закрепленное на оси, только тогда может
+		вызвать вращение, когда направление силы не проходит через ось.}
+
+		\textit{Для равновесия тела, закрепленного на оси, необходимо, чтобы
+		произведение модуля силы на расстояние от оси до линии действия силы было
+		для обеих сил одно и то же (каждая из сил лежит на плоскости, перпендикулярной
+		к оси вращения)}
+
+		\begin{equation}
+			F_1l_1 = F_2l_2
+		\end{equation}
+
+		отсюда имеем формулу \textit{момента силы}
+
+		\begin{equation}
+			M = lF \; [\text{H$\cdot$м}]
+		\end{equation}
+
+		где $l$ - плечо силы.
+
+		Если направление силы проходит через ось вращения, то плечо силы равно
+		нулю; следовательно, равен нулю и момент силы, сила не вызывает вращения
+		вокруг этой оси.
+
+		\textit{Для равновесия тела, закрепленного на оси, алгебраическая сумма
+		моментов действующих на него сил должна быть равна нулю.}
 
 \end{document}
