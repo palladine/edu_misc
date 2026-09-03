@@ -381,7 +381,8 @@
     $ git stash list                    список спрятанных изменений
 
     $ git stash apply <stash_name>      показать спрятанное изменение (из списка не удаляется)
-                                        ( пр. $ git stash apply stash@{0} ) 
+                                        ( пр. $ git stash apply stash@{0} 
+                                        или   $ git stash apply 0) 
 
     $ git stash drop <stash_name>       удаление спрятанного изменения из листа
 
