@@ -2,6 +2,7 @@
 \documentclass[a4paper,12pt]{article}
 \usepackage{fontspec}
 \usepackage{polyglossia}
+\usepackage{amsmath}
 \usepackage{microtype}
 \usepackage{unicode-math}
 \usepackage[left=15mm,right=15mm,top=15mm,bottom=20mm]{geometry}
@@ -333,11 +334,82 @@
 
 		\paragraph*{Движение тела, брошенного в горизонтальном направлении.} \
 		
+		\begin{wrapfigure}{l}{0.5\textwidth} % r = right
+            \vspace{10pt}
+            \centering
+            % \includegraphics[width=0.46\textwidth]{01}
+            \includegraphics[scale=0.9]{051}
+			\captionsetup{width=0.3\textwidth}
+            \caption{Разложение скорости на проекции}
+            \label{fig:051}
+        \end{wrapfigure}
+		
+		\
+
 		Движение проекции тела на ось $x$ - это движение без ускорения со скоростью $v_x=v_0$;
 		движение проекции тела на ось $y$ - это свободное падение с ускорением $a_y=g$ без 
-		начальной скорости под действием силы тяжести.
-
+		начальной скорости под действием силы тяжести. 
 		
+		Компонента скорости $v_x$ остается постоянной и равной $v_0$. 
+		
+		Компонента $v_y$ растет пропорционально времени $v_y=gt$.
+		
+		Результирующую скорость легко найти по правилу параллелограмма (рис.~\ref{fig:051}). 
+
+		Координаты тела в момент $t$
+
+		\begin{equation*}
+			\begin{cases}
+				\ x = v_0t, \\
+				\ y = \frac{gt^2}{2}.
+			\end{cases}
+		\end{equation*}
+		
+
+		следовательно уравнение траектории
+
+		\begin{equation}
+			y = \frac{gx^2}{2v_0^2}
+		\end{equation}
+
+		График траектории - парабола. Приняв $y$ за высоту, а $x$ за расстояние по горизонтали
+		до места падения тела, можно найти это расстояние
+
+		\begin{equation*}
+			s = v_0\sqrt{\frac{2h}{g}}	
+		\end{equation*}
+
+		\
+
+		\paragraph*{Движение тела, брошенного под углом к горизонту.} \
+
+		Проекции начальной скорости на ось $x$ равна $v_0 \cdot \cos \alpha$, а на ось $y$ равна
+		$v_0 \cdot \sin \alpha$. 
+		
+		Проекция ускорения на ось $y$ равна $-g$, на ось $x$ - нулю.
+
+		Координатs $x$ и $y$ тела в момент времени $t$ равны
+
+		\begin{equation*}
+			\begin{cases}
+				\ x = v_0 \cdot \cos \alpha \cdot t \\
+				\ y = v_0 \cdot \sin \alpha \cdot t - \frac{gt^2}{2}
+			\end{cases}
+		\end{equation*}
+		
+		Движение проекции тела на ось $y$ будет сначала равнозамедленным, после достижения тела
+		вершины, проекция скорости $v_y$ станет отрицательной, начнется равноускоренное движение 
+		вниз. Проекция скорости на ось $y$ будет изменяться по времени
+		
+		\begin{equation*}
+			v_y = v_0 \cdot \sin \alpha - gt
+		\end{equation*}
+
+		При $v_0 = 0$ тело достигнет вершины.
+
+
+		\
+
 		\subsection*{Динамика}
 
 		Если на тело не действуют никакие другие тела, то тело сохраняет
