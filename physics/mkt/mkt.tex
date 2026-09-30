@@ -1,0 +1,48 @@
+% !TEX program = lualatex
+\documentclass[a4paper,12pt]{article}
+\usepackage{fontspec}
+\usepackage{polyglossia}
+\usepackage{amsmath}
+\usepackage{microtype}
+\usepackage{unicode-math}
+\usepackage[left=15mm,right=15mm,top=15mm,bottom=20mm]{geometry}
+\usepackage{graphicx}
+\usepackage{caption}
+% \usepackage{tabularx}
+\usepackage{wrapfig}
+\usepackage{mdframed}
+\usepackage{setspace}
+
+\setmainlanguage{russian}
+\setotherlanguage{english}
+% Переключение: \textenglish{...} или \begin{english}...\end{english}
+\setmainfont{Times New Roman}
+\setmonofont{Source Code Pro}
+% \setmathfont{Libertinus Math}
+% \setmathfont{STIX Two Math}
+\setmathfont{Cambria Math}
+\setlength{\parindent}{10mm}
+\setlength{\parskip}{2mm}
+
+\pretocmd{\subsection}{\clearpage}{}{}
+
+\begin{document}
+
+		\subsection*{Теплота}
+
+		\textit{Изменение размеров тела пропорционально изменению температуры.}
+
+		Тепловое расширение материала характеризуется величиной
+
+		\begin{equation}
+			\alpha = \frac{l-l_0}{l_0(t-t_0)}
+		\end{equation}
+
+		где $t_0$ - начальная температура, $l_0$ - начальная длина, $t$ - текущая температура,
+		$l$ - текущая длина.
+
+		Эта величина называется \textit{температурным коэффициентом линейного расширения} и 
+		показывает, на какую долю своей нормальной длины увеличивается длина тела при 
+		нагревании на $1\text{К}$.
+
+\end{document}
